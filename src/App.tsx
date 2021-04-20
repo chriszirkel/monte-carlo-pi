@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { AppBar, Box, Button, ButtonGroup, Container, createStyles, Divider, Grid, makeStyles, Toolbar, Typography, useMediaQuery, useTheme } from "@material-ui/core";
+import { AppBar, Box, Button, ButtonGroup, createStyles, Grid, makeStyles, Toolbar, Typography } from "@material-ui/core";
 import { useInterval } from "./useInterval";
 import Plot from 'react-plotly.js';
 import { useDimensions } from "./useDimensions";
@@ -12,8 +12,8 @@ const useStyles = makeStyles((theme) => createStyles({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    order: 2,
 
+    order: 2,
     [theme.breakpoints.down('xs')]: {
       order: 1,
     },
