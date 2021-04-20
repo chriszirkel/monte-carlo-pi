@@ -1,8 +1,42 @@
 import React from "react";
 import "./App.css";
-import { AppBar, Box, Button, ButtonGroup, Container, Grid, Toolbar, Typography } from "@material-ui/core";
+import { AppBar, Box, Button, ButtonGroup, Container, createStyles, Divider, Grid, makeStyles, Toolbar, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { useInterval } from "./useInterval";
 import Plot from 'react-plotly.js';
+import { useDimensions } from "./useDimensions";
+
+const useStyles = makeStyles((theme) => createStyles({
+  pi: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    order: 2,
+
+    [theme.breakpoints.down('xs')]: {
+      order: 1,
+    },
+  },
+  plot: {
+    order: 1,
+    [theme.breakpoints.down('xs')]: {
+      order: 2,
+    },
+  },
+  buttons: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: '24px 8px',
+
+    [theme.breakpoints.down('xs')]: {
+      position: 'absolute',
+      bottom: 0,
+    },
+  },
+}));
 
 interface Raindrop {
   x: number;
@@ -59,9 +93,10 @@ function range(start: number, stop: number, step: number) {
 const CIRCLE_PATH = 'M0,1 ' + range(0, 1, 0.001).map(x => `L${x},${y(x)}`).join(' ');
 
 function App() {
+  const classes = useStyles();
   const [raindrops, setRaindrops] = React.useState<Raindrop[]>([]);
   const [interval, setInterval] = React.useState<number | null>(null);
-
+  const [dimensions, ref] = useDimensions();
   // rain interval
   useInterval(() => {
     setRaindrops((raindrops) => [...raindrops, ...rain(100)]);
@@ -78,86 +113,126 @@ function App() {
   return (
     <>
       <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6">Monte Carlo Pi Simulation</Typography>
+        <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Pi Simulation</Typography>
+
+          <Typography variant="h6" style={{ textAlign: 'right' }}>
+            Raindrops: {raindrops.length}
+          </Typography>
         </Toolbar>
       </AppBar>
-      <Container>
-        <Grid container>
-          <Grid container item xs={6} justify="flex-end">
-            <Plot
-              data={[
-                {
-                  xy: xy(dropsInside),
-                  type: 'pointcloud',
-                  marker: { color: 'blue' },
-                },
-                {
-                  xy: xy(dropsOutside),
-                  type: 'pointcloud',
-                  marker: { color: 'red' },
-                }
-              ]}
-              layout={{
-                xaxis: {
-                  range: [0, 1],
-                  dtick: 0.2,
-                },
-                yaxis: {
-                  range: [0, 1],
-                  dtick: 0.2,
-                },
-                shapes: [
-                  {
-                    type: 'path',
-                    path: CIRCLE_PATH,
-                    line: {
-                      color: 'black'
-                    }
-                  },
-                ],
-                width: 400,
-                height: 400,
-                title: 'Approximtion of Pi',
-                showlegend: false
-              }}
-            />
-          </Grid>
-          <Grid container item xs={6} justify="center" direction="column" alignItems="flex-start">
-            <Typography variant="body1">Raindrops: {raindrops.length}</Typography>
-            <Typography variant="body1" style={{ color: 'blue' }}>Inside: {dropsInside.length}</Typography>
-            <Typography variant="body1" style={{ color: 'red' }}>Outside: {dropsOutside.length}</Typography>
 
-            <Typography variant="body1">
-              <br />
-              Approximation of Pi:
-              <br />
-              π = 4 * ( Inside / Outside ) = {approximation}
-            </Typography>
-          </Grid>
+      <Grid container>
+        <Grid item xs={12} sm={6} className={classes.pi}>
+          <Typography variant="h6" style={{ padding: '8px', }}>
+            Approximation of Pi:<br />
+              π = 4 * ( <span style={{ color: 'blue' }}>{dropsInside.length || 'Inside'}</span> / <span style={{ color: 'red' }}>{dropsOutside.length || 'Outside'}</span> )<br />
+            <b>{approximation}</b>
+          </Typography>
+
+          <Box className={classes.buttons}>
+            <Typography variant="h6">Add Raindrops</Typography>
+
+            <ButtonGroup variant="contained" color="primary">
+              <Button disabled={interval !== null} onClick={dropRain(1)}>1</Button>
+              <Button disabled={interval !== null} onClick={dropRain(10)}>10</Button>
+              <Button disabled={interval !== null} onClick={dropRain(100)}>100</Button>
+              <Button disabled={interval !== null} onClick={dropRain(1000)}>1000</Button>
+              {interval === null ? (
+                <Button variant="contained" color="primary" onClick={startRain}>Let It Rain</Button>
+              ) : (
+                <Button variant="contained" color="primary" onClick={stopRain}>Stop The Rain</Button>
+              )}
+            </ButtonGroup>
+          </Box>
         </Grid>
-        <Box display="flex" alignItems="center" justifyContent="center">
-          <Typography variant="body1">Add Raindrop:</Typography>
-
-          <ButtonGroup disabled={interval !== null} variant="outlined" color="primary">
-            <Button onClick={dropRain(1)}>1</Button>
-            <Button onClick={dropRain(10)}>10</Button>
-            <Button onClick={dropRain(100)}>100</Button>
-            <Button onClick={dropRain(1000)}>1000</Button>
-          </ButtonGroup>
-        </Box>
-
-        <Box display="flex" alignItems="center" justifyContent="center">
-          <Typography variant="body1">Let It Rain:</Typography>
-
-          {interval === null ? (
-            <Button variant="outlined" color="primary" onClick={startRain}>Start</Button>
-          ) : (
-            <Button variant="outlined" color="primary" onClick={stopRain}>Stop</Button>
-          )}
-        </Box>
-
-      </Container>
+        <Grid ref={ref} item xs={12} sm={6} className={classes.plot}>
+          <Plot
+            data={[
+              {
+                xy: xy(dropsInside),
+                type: 'pointcloud',
+                name: 'Inside',
+                marker: { color: 'blue' },
+              },
+              {
+                xy: xy(dropsOutside),
+                name: 'Outside',
+                type: 'pointcloud',
+                marker: { color: 'red' },
+              }
+            ]}
+            layout={{
+              xaxis: {
+                range: [0, 1],
+                dtick: 0.5,
+                fixedrange: true,
+                rangemode: "nonnegative",
+              },
+              yaxis: {
+                range: [0, 1],
+                dtick: 0.5,
+                fixedrange: true,
+                rangemode: "nonnegative",
+              },
+              shapes: [
+                {
+                  type: 'path',
+                  path: CIRCLE_PATH,
+                  line: {
+                    color: 'black'
+                  }
+                },
+              ],
+              width: dimensions?.width,
+              height: dimensions?.width,
+              autosize: true,
+              margin: {
+                l: 25,
+                r: 25,
+                b: 25,
+                t: 25,
+              },
+              showlegend: false,
+              uirevision: false,
+              hovermode: false,
+              annotations: [
+                {
+                  xref: 'paper',
+                  yref: 'paper',
+                  x: 1,
+                  xanchor: 'right',
+                  y: 1,
+                  yanchor: 'bottom',
+                  text: `Outside: ${dropsOutside.length}`,
+                  showarrow: false,
+                  font: {
+                    size: 16,
+                    color: 'red'
+                  }
+                },
+                {
+                  xref: 'paper',
+                  yref: 'paper',
+                  x: 0,
+                  xanchor: 'left',
+                  y: 1,
+                  yanchor: 'bottom',
+                  text: `Inside: ${dropsInside.length}`,
+                  showarrow: false,
+                  font: {
+                    size: 16,
+                    color: 'blue'
+                  }
+                }
+              ]
+            }}
+            config={{
+              displayModeBar: false
+            }}
+          />
+        </Grid>
+      </Grid>
     </>
   );
 }
