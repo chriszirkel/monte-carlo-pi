@@ -115,7 +115,7 @@ function App() {
 
   const dropsInside = raindrops.filter(d => d.isInside);
   const dropsOutside = raindrops.filter(d => !d.isInside);
-  const approximation = 4 * (dropsInside.length / raindrops.length);
+  const approximation = 4 * (dropsInside.length / raindrops.length) || 0;
 
   const dropRain = (dropCounter: number) => () => setRaindrops((raindrops) => [...raindrops, ...rain(dropCounter)]);
   const startRain = () => setInterval(500);
@@ -133,7 +133,7 @@ function App() {
         <Grid item xs={12} sm={6} className={classes.pi}>
           <Typography variant="h6" style={{ padding: '8px', }}>
             Approximation of Pi:<br />
-              π = 4 * ( <span style={{ color: 'blue' }}>{dropsInside.length || 'Inside'}</span> / <span style={{ color: 'black' }}>{raindrops.length || 'Raindrops'}</span> )<br />
+              π = 4 * ( <span style={{ color: 'blue' }}>{dropsInside.length || 'Raindrops Inside'}</span> / <span style={{ color: 'black' }}>{raindrops.length || 'Raindrops Total'}</span> )<br />
             <b>{approximation}</b>
           </Typography>
 
@@ -154,7 +154,7 @@ function App() {
           </Box>
         </Grid>
         <Grid ref={ref} item xs={12} sm={6} className={classes.plot}>
-          <Typography variant="body1" style={{ textAlign: 'right' }}>
+          <Typography variant="body1">
             Raindrops: {raindrops.length}
           </Typography>
           <Plot
