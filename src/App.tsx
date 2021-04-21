@@ -19,6 +19,12 @@ const useStyles = makeStyles((theme) => createStyles({
     },
   },
   plot: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: '8px 0',
+
     order: 1,
     [theme.breakpoints.down('xs')]: {
       order: 2,
@@ -45,13 +51,18 @@ interface Raindrop {
   isInside: boolean;
 }
 
+// generate random number from -1 to 1
+function random(): number {
+  return Math.random() * (Math.random() < 0.5 ? -1 : 1);
+}
+
 // generate random X-Y values and determine if they are inside or outside the circle
 function rain(dropCounter: number): Raindrop[] {
   const drops = [];
 
   for (let i = 0; i < dropCounter; i++) {
-    const x = Math.random();
-    const y = Math.random();
+    const x = random();
+    const y = random();
     const distance = Math.sqrt(x * x + y * y);
     const isInside = distance < 1.0;
 
@@ -114,11 +125,7 @@ function App() {
     <>
       <AppBar position="static">
         <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="h6">Pi Simulation</Typography>
-
-          <Typography variant="h6" style={{ textAlign: 'right' }}>
-            Raindrops: {raindrops.length}
-          </Typography>
+          <Typography variant="h6">Monte Carlo Pi Simulation</Typography>
         </Toolbar>
       </AppBar>
 
@@ -126,7 +133,7 @@ function App() {
         <Grid item xs={12} sm={6} className={classes.pi}>
           <Typography variant="h6" style={{ padding: '8px', }}>
             Approximation of Pi:<br />
-              π = 4 * ( <span style={{ color: 'blue' }}>{dropsInside.length || 'Inside'}</span> / <span style={{ color: 'red' }}>{dropsOutside.length || 'Outside'}</span> )<br />
+              π = 4 * ( <span style={{ color: 'blue' }}>{dropsInside.length || 'Inside'}</span> / <span style={{ color: 'black' }}>{raindrops.length || 'Raindrops'}</span> )<br />
             <b>{approximation}</b>
           </Typography>
 
@@ -147,6 +154,9 @@ function App() {
           </Box>
         </Grid>
         <Grid ref={ref} item xs={12} sm={6} className={classes.plot}>
+          <Typography variant="body1" style={{ textAlign: 'right' }}>
+            Raindrops: {raindrops.length}
+          </Typography>
           <Plot
             data={[
               {
@@ -164,25 +174,37 @@ function App() {
             ]}
             layout={{
               xaxis: {
-                range: [0, 1],
+                range: [-1, 1],
                 dtick: 0.5,
                 fixedrange: true,
                 rangemode: "nonnegative",
               },
               yaxis: {
-                range: [0, 1],
+                range: [-1, 1],
                 dtick: 0.5,
                 fixedrange: true,
                 rangemode: "nonnegative",
               },
               shapes: [
+                // {
+                //   type: 'path',
+                //   path: CIRCLE_PATH,
+                //   line: {
+                //     color: 'black'
+                //   }
+                // },
                 {
-                  type: 'path',
-                  path: CIRCLE_PATH,
+                  type: 'circle',
+                  xref: 'x',
+                  yref: 'y',
+                  x0: -1,
+                  y0: -1,
+                  x1: 1,
+                  y1: 1,
                   line: {
                     color: 'black'
-                  }
-                },
+                  },
+                }
               ],
               width: dimensions?.width,
               height: dimensions?.width,
@@ -207,7 +229,7 @@ function App() {
                   text: `Outside: ${dropsOutside.length}`,
                   showarrow: false,
                   font: {
-                    size: 16,
+                    size: 14,
                     color: 'red'
                   }
                 },
@@ -221,7 +243,7 @@ function App() {
                   text: `Inside: ${dropsInside.length}`,
                   showarrow: false,
                   font: {
-                    size: 16,
+                    size: 14,
                     color: 'blue'
                   }
                 }
