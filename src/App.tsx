@@ -161,17 +161,15 @@ function App() {
           <Typography variant="h6" style={{ padding: "8px" }}>
             <span>Approximation of Pi:</span>
             <br />
-            <span>
-              π = 4 * ({" "}
-              <span style={{ color: "blue" }}>
-                {dropsInside.length || "Raindrops Inside"}
-              </span>{" "}
-              /{" "}
-              <span style={{ color: "black" }}>
-                {raindrops.length || "Raindrops Total"}
-              </span>{" "}
-              )
+            <span>π = 4 * (</span>
+            <span style={{ color: "blue" }}>
+              {dropsInside.length || "Raindrops Inside"}
             </span>
+            <span>/</span>
+            <span style={{ color: "black" }}>
+              {raindrops.length || "Raindrops Total"}
+            </span>
+            <span>)</span>
             <br />
             <b>{approximation}</b>
           </Typography>
