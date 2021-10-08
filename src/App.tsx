@@ -72,7 +72,7 @@ function rain(dropCounter: number): Raindrop[] {
   for (let i = 0; i < dropCounter; i++) {
     const x = Math.random();
     const y = Math.random();
-    const distance = x^2 + y^2;
+    const distance = (x ^ 2) + (y ^ 2);
     const isInside = distance < 1.0;
 
     drops.push({
